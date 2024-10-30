@@ -1,5 +1,21 @@
 import 'package:city_spectors/models/crimes_card.dart';
+import 'package:city_spectors/providers/locationprovider.dart';
+import 'package:city_spectors/screens/pages/report.dart';
+import 'package:city_spectors/screens/pages/sos.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+final Map<String, String> crimes = {
+  "Traffic Offence": "assets/images/traffic-light.png",
+  "Traffic Accident": "assets/images/car-accident.png",
+  "Theft": "assets/images/theft.png",
+  "Vandalism": "assets/images/tire.png",
+  "Violence": "assets/images/school.png",
+  "Fraud": "assets/images/fraud.png",
+  "Drug Offence": "assets/images/weed.png",
+  "Murder": "assets/images/murderer.png",
+  "Others": "assets/images/handcuffs.png"
+};
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -9,23 +25,15 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  final Map<String, String> crimes = {
-    "Traffic Offence": "assets/images/traffic-light.png",
-    "Traffic Accident": "assets/images/car-accident.png",
-    "Theft": "assets/images/theft.png",
-    "Vandalism": "assets/images/tire.png",
-    "Violence": "assets/images/school.png",
-    "Fraud": "assets/images/fraud.png",
-    "Drug Offence": "assets/images/weed.png",
-    "Murder": "assets/images/murderer.png",
-    "Others": "assets/images/handcuffs.png"
-  };
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Location"),
+        title: context.watch<LocationProvider>().currentLocation?.longitude !=
+                null
+            ? Text(
+                "${context.watch<LocationProvider>().currentLocation?.longitude}")
+            : CircularProgressIndicator(),
         centerTitle: true,
         foregroundColor: Theme.of(context).primaryColor,
         backgroundColor: Theme.of(context).primaryColorDark,
@@ -45,6 +53,12 @@ class _HomepageState extends State<Homepage> {
                   child: GestureDetector(
                     onLongPress: () {
                       print("SOS initialized");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Sos(),
+                        ),
+                      );
                     },
                     child: Container(
                       height: 150,
@@ -106,6 +120,12 @@ class _HomepageState extends State<Homepage> {
                     return GestureDetector(
                       onTap: () {
                         print(entry.key);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Report(crime: entry.key),
+                          ),
+                        );
                       },
                       child: CrimesCard(
                           image: entry.value, description: entry.key),

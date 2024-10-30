@@ -1,7 +1,38 @@
+import 'package:city_spectors/providers/locationprovider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
+import 'package:geocoding/geocoding.dart';
 
-class Stations extends StatelessWidget {
+class Stations extends StatefulWidget {
   const Stations({super.key});
+
+  @override
+  State<Stations> createState() => _StationsState();
+}
+
+class _StationsState extends State<Stations> {
+  String _selectedAddress = "Tap on the map to get the location name";
+
+  Future<void> _getAddressFromLatLng(LatLng position) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      if (placemarks.isNotEmpty) {
+        setState(() {
+          _selectedAddress =
+              "${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.country}";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _selectedAddress = "Could not retrieve address.";
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,57 +68,111 @@ class Stations extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: SearchBar(
-                textStyle: WidgetStatePropertyAll(TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                )),
+                onSubmitted: (value) {
+                  print(value);
+                },
+                textStyle: MaterialStateProperty.all(
+                  TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
                 leading: const Padding(
                   padding: EdgeInsets.only(left: 10.0),
                   child: Icon(Icons.search),
                 ),
                 hintText: "Accident location",
-                hintStyle: WidgetStatePropertyAll(TextStyle(
-                  color: Theme.of(context).hintColor,
-                  fontStyle: FontStyle.italic,
-                )),
+                hintStyle: MaterialStateProperty.all(
+                  TextStyle(
+                    color: Theme.of(context).hintColor,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: EdgeInsets.all(20.0),
               child: Container(
-                height: 250,
+                height: 400,
                 width: MediaQuery.of(context).size.width - 40,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(
-                      20,
-                    ),
-                  ),
                   color: Theme.of(context).colorScheme.tertiary,
                 ),
-                child: const Center(
-                  child: Text(
-                    "MAP",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 50,
-                      fontWeight: FontWeight.bold,
-                    ),
+                child: FlutterMap(
+                  options: MapOptions(
+                    initialCenter:
+                        context.watch<LocationProvider>().currentLocation ??
+                            const LatLng(
+                              -1.2921,
+                              36.8219,
+                            ),
+                    initialZoom: 13.0,
+                    onTap: (tapPosition, latLng) {
+                      _getAddressFromLatLng(latLng);
+                    },
                   ),
-                  // Image(
-                  //     image: AssetImage("assets/images/criminal1.png"),),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        if (context.watch<LocationProvider>().currentLocation !=
+                            null) // Only show the marker if the current location is available
+                          Marker(
+                            width: 80.0,
+                            height: 80.0,
+                            point: context
+                                .watch<LocationProvider>()
+                                .currentLocation!,
+                            child: Builder(
+                              builder: (context) => const Icon(
+                                Icons.location_pin,
+                                color: Colors.red,
+                                size: 40,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 20.0),
-                  child: Text(
-                    "Police Station Location",
+            Padding(
+              padding: EdgeInsets.only(left: 20.0, top: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width - 40,
+                    child: Column(
+                      children: [
+                        Text(
+                          _selectedAddress,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          context
+                              .watch<LocationProvider>()
+                              .currentLocation!
+                              .longitude
+                              .toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
