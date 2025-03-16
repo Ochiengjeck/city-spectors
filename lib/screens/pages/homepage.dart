@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 final Map<String, String> crimes = {
-  "Traffic Offence": "assets/images/traffic-light.png",
-  "Traffic Accident": "assets/images/car-accident.png",
-  "Theft": "assets/images/theft.png",
-  "Vandalism": "assets/images/tire.png",
+  "Academic Offence": "assets/images/data-breach.png",
+  "Drug Abuse": "assets/images/weed.png",
   "Violence": "assets/images/school.png",
+  "Vandalism": "assets/images/tire.png",
+  "Accident": "assets/images/car-accident.png",
+  "Theft": "assets/images/theft.png",
   "Fraud": "assets/images/fraud.png",
-  "Drug Offence": "assets/images/weed.png",
   "Murder": "assets/images/murderer.png",
   "Others": "assets/images/handcuffs.png"
 };
@@ -29,11 +29,17 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: context.watch<LocationProvider>().currentLocation?.longitude !=
-                null
+        title: (context.watch<LocationProvider>().currentLocation?.longitude !=
+                null)
             ? Text(
                 "${context.watch<LocationProvider>().currentLocation?.longitude}")
-            : CircularProgressIndicator(),
+            : SizedBox(
+                width: 200,
+                child: Image(
+                  image: AssetImage("assets/logos/emblem dark.png"),
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
         centerTitle: true,
         foregroundColor: Theme.of(context).primaryColor,
         backgroundColor: Theme.of(context).primaryColorDark,
@@ -52,7 +58,7 @@ class _HomepageState extends State<Homepage> {
                 child: ClipOval(
                   child: GestureDetector(
                     onLongPress: () {
-                      print("SOS initialized");
+                      print("SOS initialized ");
                       Navigator.push(
                         context,
                         MaterialPageRoute(

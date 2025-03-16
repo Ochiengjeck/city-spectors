@@ -13,7 +13,8 @@ class Stations extends StatefulWidget {
 }
 
 class _StationsState extends State<Stations> {
-  String _selectedAddress = "Tap on the map to get the location name";
+  String _selectedAddress = "Search Police Station";
+  bool _maptaped = false;
 
   Future<void> _getAddressFromLatLng(LatLng position) async {
     try {
@@ -25,11 +26,12 @@ class _StationsState extends State<Stations> {
         setState(() {
           _selectedAddress =
               "${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.country}";
+          _maptaped = true;
         });
       }
     } catch (e) {
       setState(() {
-        _selectedAddress = "Could not retrieve address.";
+        _selectedAddress = "sorry Could not retrieve address.";
       });
     }
   }
@@ -80,7 +82,7 @@ class _StationsState extends State<Stations> {
                   padding: EdgeInsets.only(left: 10.0),
                   child: Icon(Icons.search),
                 ),
-                hintText: "Accident location",
+                hintText: _selectedAddress,
                 hintStyle: MaterialStateProperty.all(
                   TextStyle(
                     color: Theme.of(context).hintColor,
@@ -95,8 +97,8 @@ class _StationsState extends State<Stations> {
                 height: 400,
                 width: MediaQuery.of(context).size.width - 40,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.tertiary,
-                ),
+                    color: Theme.of(context).colorScheme.tertiary,
+                    borderRadius: const BorderRadius.all(Radius.circular(60))),
                 child: FlutterMap(
                   options: MapOptions(
                     initialCenter:
@@ -148,26 +150,32 @@ class _StationsState extends State<Stations> {
                     width: MediaQuery.of(context).size.width - 40,
                     child: Column(
                       children: [
-                        Text(
-                          _selectedAddress,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                        if (!_maptaped)
+                          const Text(
+                            "Tap map to get location",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Text(
-                          context
-                              .watch<LocationProvider>()
-                              .currentLocation!
-                              .longitude
-                              .toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                        if (context
+                                .watch<LocationProvider>()
+                                .currentLocation
+                                ?.longitude !=
+                            null)
+                          Text(
+                            context
+                                .watch<LocationProvider>()
+                                .currentLocation!
+                                .longitude
+                                .toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),

@@ -1,4 +1,3 @@
-import 'package:city_spectors/main.dart';
 import 'package:city_spectors/providers/locationprovider.dart';
 import 'package:city_spectors/providers/themeprovider.dart';
 import 'package:flutter/material.dart';
